@@ -6,15 +6,25 @@ pipeline {
         stage('Git Checkout') {
             steps {
                 checkout scm
-                sh 'echo "Git checkout completed"'
+                bat 'echo Git checkout completed'
             }
         }
 
         stage('Telemetry Build') {
             steps {
-                sh 'echo "Building fleet telemetry service"'
-                sh 'test -f telemetry.conf'
-                sh 'cat telemetry.conf'
+                bat 'echo Building fleet telemetry service'
+
+                // Verify that telemetry.conf exists
+                bat '''
+                    if not exist telemetry.conf (
+                        echo ERROR: telemetry.conf not found
+                        exit /b 1
+                    )
+                    echo telemetry.conf found
+                '''
+
+                // Display configuration file contents
+                bat 'type telemetry.conf'
             }
         }
 
@@ -22,7 +32,7 @@ pipeline {
             steps {
                 archiveArtifacts artifacts: 'telemetry.conf',
                                  fingerprint: true
-                sh 'echo "Telemetry artifact archived"'
+                bat 'echo Telemetry artifact archived'
             }
         }
     }
